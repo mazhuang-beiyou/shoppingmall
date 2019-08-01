@@ -43,7 +43,26 @@
           </dl>
         </div>
         <!-- search result accessories list -->
-        <div class="accessory-list-wrap"></div>
+        <div class="accessory-list-wrap">
+          <div class="accessory-list col-4">
+            <ul>
+              <li v-for="item in goodsList">
+                <div class="pic">
+                  <a href="#">
+                    <img v-lazy="'static/'+item.productImage" />
+                  </a>
+                </div>
+                <div class="main">
+                  <div class="name">{{item.productName}}</div>
+                  <div class="price">{{item.salePrice}}</div>
+                  <div class="btn-area" @click="addCart(item.productId)">
+                    <a href="javascript:;" class="btn btn--m">加入购物车</a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
     <nav-footer></nav-footer>
@@ -54,6 +73,7 @@
 import NavHeader from "./../components/NavHeader";
 import NavFooter from "./../components/NavFooter";
 import NavBread from "./../components/NavBread";
+import axios from "axios";
 export default {
   data() {
     return {
@@ -79,7 +99,8 @@ export default {
       ],
       priceChecked: "all",
       filterBy: false,
-      overLayFlag: false
+      overLayFlag: false,
+      goodsList: []
     };
   },
   components: {
@@ -95,7 +116,28 @@ export default {
     setPriceFilter(index) {
       this.priceChecked = index;
       this.page = 1;
+    },
+    getData() {
+      axios
+        .get("/goods/list")
+        .then(res => {
+          this.goodsList = res.data.result.list;
+        })
+        .catch(err => {});
+    },
+    addCart(productId) {
+      axios
+        .post("/goods/addCart", { productId: productId })
+        .then(res => {
+          alert(res.data.msg);
+        })
+        .catch(err => {
+          alert("failed");
+        });
     }
+  },
+  created() {
+    this.getData();
   }
 };
 </script>
@@ -138,6 +180,7 @@ export default {
   margin-right: 25px;
 }
 .filter {
+  float: left;
   box-sizing: border-box;
   width: 230px;
   padding: 0 20px 0 20px;
@@ -182,5 +225,61 @@ export default {
   -webkit-transition: padding-left 0.3s ease-out;
   transition: padding-left 0.3s ease-out;
   text-decoration: none;
+}
+.accessory-list-wrap {
+  overflow: auto;
+}
+.accessory-list-wrap ul {
+  list-style: none;
+}
+.accessory-list-wrap ul li {
+  width: 250px;
+  float: left;
+  height: 350px;
+  background: white;
+  margin: 10px 10px;
+}
+.accessory-list-wrap ul li:hover {
+  position: relative;
+  left: 1px;
+  bottom: 1px;
+  box-shadow: 0 1px 6px orange;
+  border-color: #eee;
+  transition: all 0.2s ease-in-out;
+}
+.pic {
+  height: 200px;
+  padding: 10px;
+}
+.pic img {
+  height: 100%;
+}
+.name {
+  text-align: left;
+  padding-left: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: gray;
+}
+.price {
+  padding-left: 20px;
+  text-align: left;
+  margin-top: 35px;
+  color: indianred;
+}
+.btn-area {
+  margin: 5px;
+  line-height: 38px;
+  height: 38px;
+  border: solid 1px indianred;
+  cursor: pointer;
+}
+.btn-area a {
+  color: indianred;
+  text-decoration: none;
+}
+.btn-area:hover{
+  background:#ffe5e6;
+  transition:all .3s ease-out
 }
 </style>
